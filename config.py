@@ -11,9 +11,9 @@ class Config:
         self.enemy = 1
 
         # unit states
-        self.move
-        self.attack
-        self.disperse
+        self.move = 0
+        self.attack = 1
+        self.disperse = 2
 
         # emission types
         self.spectrum = 0

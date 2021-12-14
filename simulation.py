@@ -127,17 +127,31 @@ class Unit(pygame.sprite.Sprite):
         y = self.y_pos + self.heading[1]
 
         if self.state == cf.move:
-            print("somthing")
-            #self.rect.center = [self.x_pos, self.y_pos]
+            #print(self.heading)
+            x = self.x_pos + self.heading[0]
+            y = self.y_pos + self.heading[1]
+
         elif self.state == cf.attack:
-            #self.rect.center = [self.x_pos, self.y_pos]
-            print("somthing")
-        elif self.state == cf.disperse:
-            #self.rect.center = [self.x_pos, self.y_pos]
-            print("somthing")
+            closest_list = sorted(closest_dic)
+            origin = closest_dic[closest_list[0]]
+            nearest_blue = []
+            blue_x = []
+            blue_y = []
+            temp = pygame.Rect((origin[0] - cf.unit_size, origin[1] - cf.unit_size),(cf.unit_size,cf.unit_size))
+            red_dist = rect_distance(self.rect, temp)
+            for unit in blue_group:
+                nearest_blue.append(rect_distance(self.rect, unit.rect))
+                blue_x.append(unit.x_pos)
+                blue_y.append(unit.y_pos)
 
+            if sum(nearest_blue)/len(nearest_blue) < red_dist*2:
+                self.heading = navigate((self.x_pos, self.y_pos), origin)
+            else:
+                self.heading = navigate((self.x_pos, self.y_pos),(int(sum(blue_x)/len(blue_x)),int(sum(blue_y)/len(blue_y))))
+            #x = self.x_pos + self.heading[0]
+            #y = self.y_pos
 
-        if (x > (cf.board_size_x - cf.unit_size) or x < 0): #or :
+        if (x > (cf.board_size_x - cf.unit_size) or x < 0):
             self.heading = horizontal_bounce(self.heading)
             self.x_pos = self.x_pos + self.heading[0]
             self.y_pos = self.y_pos + self.heading[1]
@@ -146,6 +160,8 @@ class Unit(pygame.sprite.Sprite):
             self.x_pos = self.x_pos + self.heading[0]
             self.y_pos = self.y_pos + self.heading[1]
 
+        self.x_pos = x
+        self.y_pos = y
         self.rect.center = [self.x_pos, self.y_pos]
 
 
@@ -204,28 +220,17 @@ def navigate(location, destination):
 
 def blue_observe():
     for unit in blue_group:
-        blue_collision = unit.rect.collidelist(unit_group.sprites())
         emit_collision = unit.rect.collidelist(emission_group.sprites())
-        if(blue_collision != -1):
-            op_unit = unit_group.sprites()[blue_collision]
-            unit.heading = bounce(unit.heading)
-            op_unit.heading = bounce(op_unit.heading)
-
         if(emit_collision != -1):
             emit = emission_group.sprites()[emit_collision]
             emit_type, origin, distance = emit.getData()
             unit.distribute_ko(emit_type,origin,60,distance)
-            #unit.heading = navigate((unit.x_pos,unit.y_pos),origin) ## need to replace with rules
-
 
 def blue_orient():
     closest_list = sorted(closest_dic)
-    if len(closest_list ) > 0:
-        origin = closest_dic[closest_list[0]]
+    if len(closest_list) > 0:
         for unit in blue_group:
-            unit.heading = navigate((unit.x_pos, unit.y_pos), origin)
-            #if unit.x_pos == origin and unit.y_pos:
-            #    closest_dic.pop(closest_list[0])
+            unit.state = cf.attack
 
 def update():
     # Blue Observe - collect data from the collisions and update knowledge object
@@ -258,7 +263,7 @@ def update():
     ## blue kill first for initative
 
     for unit in red_group:
-        prop = random.randint(0, 50)
+        prop = random.randint(0, 100)
         #print(prop)
         if prop == 1:
             heading = cf.dir_list[random.randint(1, len(cf.dir_list) - 1)]
@@ -266,7 +271,7 @@ def update():
             y = unit.y_pos
             emit = Emission(emission_type=cf.spectrum, x_pos=x, y_pos=y, origin_unit=unit.rect, origin=unit.rect.center,  heading=heading)
             emission_group.add(emit)
-        elif prop > 30:
+        elif prop > 3:
             heading = cf.dir_list[random.randint(1, len(cf.dir_list) - 1)]
             x = unit.x_pos
             y = unit.y_pos
