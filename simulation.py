@@ -43,7 +43,7 @@ class Emission(pygame.sprite.Sprite):
         self.image.fill(cf.green)
         self.rect = self.image.get_rect()
         self.origin_unit = origin_unit
-        self.origin = origin
+        self.origin = (random.randint(origin[0]-30,origin[0]+30), random.randint(origin[1]-30,origin[1]+30))
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.rect.center = [x_pos, y_pos]
@@ -97,8 +97,7 @@ class Unit(pygame.sprite.Sprite):
         self.heading = heading
         self.last_heading = heading
         self.heading_lock = 0
-        self.x_count = 0
-        self.y_count = 0
+        self.state = cf.move
 
     def distribute_ko(self, type, origin, radius, distance):
         blockchain.new_knowledge_object(type, origin, radius, distance)
@@ -112,50 +111,31 @@ class Unit(pygame.sprite.Sprite):
             y = y / abs(y)
         return(x,y)
 
-    #def get_collision(self):
-    #    collision = False
-    #    direction = (0,0)
-    #    unit_collision = self.rect.collidelist(blue_group.sprites())   #sprites(unit_group.sprites())
-    #    if (unit_collision != -1):
-    #        collision = True
-   #         bump = unit_group.sprites()[unit_collision]
-    #        direction = self.get_direction(bump)
-    #    return collision, direction
-
 
     def move(self):
-        attack = False
-        disperse = True
-
-        start_x = self.heading[0]
-        start_y = self.heading[1]
-
-        unit_collision = self.rect.collidelist(blue_group.sprites())  # sprites(unit_group.sprites())
-        #print(unit_collision)
+        # check for collision
+        unit_collision = self.rect.collidelist(blue_group.sprites())
         if(unit_collision != -1):
             bump = unit_group.sprites()[unit_collision]
-            if(bump != self):
-                self.heading = bounce(self.heading)
+            if bump != self:
+                self.heading = cf.dir_list[random.randint(0, 8)]
                 self.last_heading = self.heading
                 self.heading_lock = 30
+                # bounce and lock heading for 30 turns
 
-        if self.x_count > 5:
-            self.heading = cf.dir_list[random.randint(0,8)]
-            self.last_heading = self.heading
-            self.heading_lock = 30
+        x = self.x_pos + self.heading[0]
+        y = self.y_pos + self.heading[1]
 
-        if self.y_count > 5:
-            self.heading = cf.dir_list[random.randint(0,8)]
-            self.last_heading = self.heading
-            self.heading_lock = 30
+        if self.state == cf.move:
+            print("somthing")
+            #self.rect.center = [self.x_pos, self.y_pos]
+        elif self.state == cf.attack:
+            #self.rect.center = [self.x_pos, self.y_pos]
+            print("somthing")
+        elif self.state == cf.disperse:
+            #self.rect.center = [self.x_pos, self.y_pos]
+            print("somthing")
 
-        if self.heading_lock > 0:
-            self.heading_lock = self.heading_lock - 1
-            x = self.x_pos + self.last_heading[0]
-            y = self.y_pos + self.last_heading[1]
-        else:
-            x = self.x_pos + self.heading[0]
-            y = self.y_pos + self.heading[1]
 
         if (x > (cf.board_size_x - cf.unit_size) or x < 0): #or :
             self.heading = horizontal_bounce(self.heading)
@@ -165,21 +145,10 @@ class Unit(pygame.sprite.Sprite):
             self.heading = vertical_bounce(self.heading)
             self.x_pos = self.x_pos + self.heading[0]
             self.y_pos = self.y_pos + self.heading[1]
-        else:
-            self.x_pos = x
-            self.y_pos = y
-
-        if self.x_pos == start_x:
-            self.x_count = self.x_count + 1
-        else:
-            self.x_count = 0
-
-        if self.y_pos == start_y:
-            self.y_count = self.y_count + 1
-        else:
-            self.y_count = 0
 
         self.rect.center = [self.x_pos, self.y_pos]
+
+
 
 
 def rect_distance(rect1, rect2):

@@ -1,16 +1,25 @@
 class Config:
     def __init__(self):
         # Game Constraints
-        self.board_size = 1000
+        self.board_size_x = 1500
+        self.board_size_y = 400
+        self.heading = 30
         self.unit_size = 10
 
         # unit types
         self.friendly = 0
         self.enemy = 1
 
+        # unit states
+        self.move
+        self.attack
+        self.disperse
+
         # emission types
         self.spectrum = 0
         self.thermal = 1
+        self.visual = 2
+        self.direct_fire = 3
         self.lifespan = 50
 
         # Colors
