@@ -5,22 +5,48 @@ class Config:
         self.board_size_y = 400
         self.heading = 30
         self.unit_size = 10
+        self.red_start_set = 5
+        self.blue_start_set = 15
 
         # unit types
         self.friendly = 0
         self.enemy = 1
+
+        #cop
+        self.cop_spectrum_lifespan = 700
+        self.cop_thermal_lifespan = 900
+        self.cop_visual_lifespan = 1000
+        self.cop_kill_lifespan = 5000
 
         # unit states
         self.move = 0
         self.attack = 1
         self.disperse = 2
 
+        # unit speed
+        self.blue_speed = 1
+        self.red_speed = 1
+
+        # unit range
+        self.blue_range = 30
+        self.red_range = 31
+
+        # unit accuracy
+        self.blue_accuracy = 80
+        self.red_accuracy = 60
+
         # emission types
         self.spectrum = 0
         self.thermal = 1
         self.visual = 2
-        self.direct_fire = 3
+        self.red_kill = 3
         self.lifespan = 50
+
+        # emission origin radius
+        self.spectrum_radius = 50
+        self.thermal_radius = 40
+        self.visual_radius = 30
+        self.directfire_radius = 20
 
         # Colors
         self.red = (255, 0, 0)

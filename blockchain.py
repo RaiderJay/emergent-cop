@@ -2,6 +2,7 @@ from time import time
 import hashlib
 import json
 from config import Config
+import pygame
 
 cf = Config()
 
@@ -48,6 +49,13 @@ class BlockChainCop(object):
         hex_hash = raw_hash.hexdigest()
 
         return hex_hash
+
+    #need to find betterway to minimuze intersetion of reported areas
+    def calc_intersect(self):
+        rectlist
+        temp = pygame.Rect((origin[0] - cf.unit_size, origin[1] - cf.unit_size), (cf.unit_size, cf.unit_size))
+        self.last_block
+        return rect
 
 
 #blockchain = BlockChainCop()
