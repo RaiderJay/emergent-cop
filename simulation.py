@@ -167,17 +167,17 @@ class Unit(pygame.sprite.Sprite):
                         dist[distList[0]].kill()
 
     def smart_bump(self):
-        prob = random.randint(0,1)
+        prob = random.randint(0,3)
         self.state = cf.move
         self.heading_lock = 10
 
         if self.heading == cf.N or self.heading == cf.S:
-            if prob == 0:
+            if prob > 1:
                 self.heading = cf.E
             else:
                 self.heading = cf.W
         elif self.heading == cf.E or self.heading == cf.W:
-            if prob == 0:
+            if prob > 1:
                 self.heading = cf.N
             else:
                 self.heading = cf.S
@@ -188,9 +188,9 @@ class Unit(pygame.sprite.Sprite):
                 self.heading = cf.E
         elif self.heading == cf.SE:
             if prob == 0:
-                self.heading = cf.S
-            else:
                 self.heading = cf.E
+            else:
+                self.heading = cf.S
         elif self.heading == cf.NW:
             if prob == 0:
                 self.heading = cf.N
@@ -198,9 +198,10 @@ class Unit(pygame.sprite.Sprite):
                 self.heading = cf.W
         elif self.heading == cf.SW:
             if prob == 0:
-                self.heading = cf.S
-            else:
                 self.heading = cf.W
+            else:
+                self.heading = cf.S
+
         else:
             self.heading = cf.E
 
@@ -214,6 +215,15 @@ class Unit(pygame.sprite.Sprite):
                     self.last_heading = self.heading
                 else:
                     self.smart_bump()
+
+    def space(self):
+        for unit in blue_group:
+            if unit != self:
+                if util.rect_distance(self.rect, unit.rect) < 20:
+                    unit.smart_bump()
+                    self.smart_bump()
+                    break;
+
 
     def get_attack_heading(self):
         closest = {key: val[1] for key, val in closest_dic.items() if val[1] != cf.red_kill}
@@ -231,7 +241,9 @@ class Unit(pygame.sprite.Sprite):
             if distance_to_tgt < cf.red_range: # or len(blue_group.sprites()) < 2:  # bum rush
                 self.heading = util.navigate((self.x_pos, self.y_pos), origin)
             elif len(blue_group) == 1:
-                self.heading = util.navigate((self.x_pos, self.y_pos), origin)
+                self.heading = util.navigate((self.x_pos, self.y_pos), origin) # lst one bum rush
+            elif distance_to_tgt == cf.red_range+1:
+                self.heading = (0, 0)
             elif all(x < distance_to_tgt for x in neighbor_distance_tgt):  # if neighbors are near attack
                 self.heading = util.navigate((self.x_pos, self.y_pos), origin)
             elif distance_to_tgt > ave_dist:  # Catch up
@@ -239,7 +251,6 @@ class Unit(pygame.sprite.Sprite):
             else:
                 self.heading = (0, 0)  # wait
         else:
-            #print('here')
             for unit in blue_group:
                 unit.state = cf.disperse
     def move(self):
@@ -258,7 +269,10 @@ class Unit(pygame.sprite.Sprite):
         else:
             self.heading_lock = self.heading_lock - 1
 
-        self.collide()
+        if self.state == cf.attack:
+            self.space()
+        else:
+            self.collide()
 
         if (x > (cf.board_size_x - cf.unit_size) or x < 0):
             self.heading = util.horizontal_bounce(self.heading)
@@ -347,6 +361,7 @@ def simulate():
     # initialization
     pygame.init()
     screen = pygame.display.set_mode((cf.board_size_x, cf.board_size_y*2 + cf.heading*2))
+    #screen = pygame.display.set_mode((cf.board_size_x, cf.board_size_y*2 + cf.heading*2), FULLSCREEN, 32)
     main_surface = pygame.Surface((cf.board_size_x, cf.board_size_y))
     main_surface.fill(cf.white)
 
@@ -364,7 +379,7 @@ def simulate():
     #textsurface = font.render(str(len(blue_group)), False, (0, 0, 0))
 
     while True:
-        #clockobject.tick(30)
+        clockobject.tick(120)
         # tracking quitting
         for an_event in pygame.event.get():
             if an_event.type == QUIT:

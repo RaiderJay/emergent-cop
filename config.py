@@ -1,9 +1,11 @@
 class Config:
     def __init__(self):
         # Game Constraints
+        #self.board_size_x = 820
+        #self.board_size_y = 240
         self.board_size_x = 1500
         self.board_size_y = 400
-        self.heading = 30
+        self.heading = 40
         self.unit_size = 10
         self.red_start_set = 5
         self.blue_start_set = 15
@@ -32,7 +34,7 @@ class Config:
         self.red_range = 31
 
         # unit accuracy
-        self.blue_accuracy = 80
+        self.blue_accuracy = 85
         self.red_accuracy = 60
 
         # emission types
