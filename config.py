@@ -42,7 +42,7 @@ class Config:
         self.thermal = 1
         self.visual = 2
         self.red_kill = 3
-        self.lifespan = 50
+        self.lifespan = 40
 
         # emission origin radius
         self.spectrum_radius = 50

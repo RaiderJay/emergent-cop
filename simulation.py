@@ -17,6 +17,8 @@ emission_group = pygame.sprite.Group()
 cop_group = pygame.sprite.Group()
 closest_dic = {}
 
+
+
 class KO(pygame.sprite.Sprite):
     # This class represents a car. It derives from the "Sprite" class in Pygame.
 
@@ -59,7 +61,7 @@ class Emission(pygame.sprite.Sprite):
     def __init__(self, emission_type=cf.spectrum, x_pos=0, y_pos=0, origin_unit=None, origin=(0,0), heading=cf.none):
         # Call the parent class (Sprite) constructor
         super().__init__()
-        self.image = pygame.Surface([cf.unit_size*3, cf.unit_size/5])
+        self.image = pygame.Surface([1, 1])#[cf.unit_size*3, cf.unit_size/5])
         self.emission_type = emission_type
         self.image.fill(cf.green)
         self.rect = self.image.get_rect()
@@ -69,6 +71,7 @@ class Emission(pygame.sprite.Sprite):
         self.y_pos = y_pos
         self.rect.center = [x_pos, y_pos]
         self.heading = heading
+
         self.age = 0
         self.attenuation = 1
         if self.emission_type == cf.thermal:
@@ -86,24 +89,37 @@ class Emission(pygame.sprite.Sprite):
 
     def move(self, heading=(0, 1)):
         if self.age < cf.lifespan*cf.unit_size:
+            if cf.lifespan*cf.unit_size % 100 ==0:
+                if self.heading == cf.E or self.heading == cf.W:
+                    self.image = pygame.transform.scale(self.image,(self.image.get_width(), self.image.get_height() + 1))
+                else:
+                    self.image = pygame.transform.scale(self.image, (self.image.get_width()+1, self.image.get_height()))
             x = self.x_pos + heading[0]
             y = self.y_pos + heading[1]
-            if (x > (cf.board_size_x - cf.unit_size) or x < 0):  # or :
-                self.heading = util.horizontal_bounce(heading)
-                self.x_pos = self.x_pos + self.heading[0]
-                self.y_pos = self.y_pos + self.heading[1]
-            elif (y > (cf.board_size_y - cf.unit_size) or y < 0):
-                self.heading = util.vertical_bounce(heading)
-                self.x_pos = self.x_pos + self.heading[0]
-                self.y_pos = self.y_pos + self.heading[1]
-            else:
-                self.x_pos = x
-                self.y_pos = y
+
+            self.x_pos = x
+            self.y_pos = y
             self.rect.center = [self.x_pos, self.y_pos]
             self.age += self.attenuation
         else:
             self.kill()
 
+class ADA(pygame.sprite.Sprite):
+    def __init__(self, unit_type=cf.friendly, x_pos=cf.unit_size, y_pos=cf.unit_size, heading=cf.none):
+        super().__init__()
+        self.image = pygame.Surface([cf.unit_size, cf.unit_size])
+        self.unit_type = unit_type
+        self.image.fill(cf.blue)
+        if self.unit_type == cf.enemy:
+            self.image.fill(cf.red)
+        self.rect = self.image.get_rect()
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.rect.center = [x_pos, y_pos]
+        self.heading = heading
+        self.last_heading = heading
+        self.heading_lock = 0
+        self.state = cf.move
 
 class Unit(pygame.sprite.Sprite):
     # This class represents a car. It derives from the "Sprite" class in Pygame.
@@ -111,11 +127,15 @@ class Unit(pygame.sprite.Sprite):
     def __init__(self, unit_type=cf.friendly, x_pos=cf.unit_size, y_pos=cf.unit_size, heading=cf.none):
         # Call the parent class (Sprite) constructor
         super().__init__()
-        self.image = pygame.Surface([cf.unit_size, cf.unit_size])
+        blue_drone = pygame.image.load('./images/blue_drone.png').convert_alpha()
+        red_ada = pygame.image.load('./images/red_ada.png').convert_alpha()
+        self.image = blue_drone
+        #self.image = pygame.Surface([cf.unit_size, cf.unit_size])
         self.unit_type = unit_type
-        self.image.fill(cf.blue)
+        #self.image.fill(cf.blue)
         if self.unit_type == cf.enemy:
             self.image.fill(cf.red)
+            self.image = red_ada
         self.rect = self.image.get_rect()
         self.x_pos = x_pos
         self.y_pos = y_pos
@@ -411,8 +431,8 @@ def simulate():
             count += 10
 
 
-        unit_group.draw(main_surface)
         emission_group.draw(main_surface)
+        unit_group.draw(main_surface)
         cop_group.draw(second_surface)
         pygame.display.flip()
         pygame.display.update()
